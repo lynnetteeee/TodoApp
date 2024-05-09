@@ -1,6 +1,9 @@
 import React, {useState} from 'react';
 import {View, Text, Button, StyleSheet, Modal, TextInput} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
+import {RootStackParamList} from '../../App';
+import {StackNavigationProp} from '@react-navigation/stack';
 
 const styles = StyleSheet.create({
   container: {
@@ -95,7 +98,8 @@ const ListsMenu = () => {
     setLists(currentLists => currentLists.filter(list => list.id !== id));
   };
 
-  // const handleNavigateToList = (id: number) => {
+  const navigation =
+    useNavigation<StackNavigationProp<RootStackParamList, 'ListsMenu'>>();
 
   // check if there is at least one list, then include header "Your Todo Lists"
   // then map through the lists to display them
@@ -114,7 +118,12 @@ const ListsMenu = () => {
       {lists.map(list => (
         <View key={list.id} style={styles.buttonContainer}>
           <TouchableOpacity
-            onPress={() => console.log('Navigate to list', list.id)}>
+            onPress={() =>
+              navigation.navigate('TodoScreen', {
+                listid: list.id,
+                listTitle: list.name,
+              })
+            }>
             <Text style={styles.listTitleText} numberOfLines={2}>
               {list.name}
             </Text>

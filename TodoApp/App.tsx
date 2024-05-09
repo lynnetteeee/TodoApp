@@ -11,7 +11,15 @@ import TodoScreen from './src/screens/TodoScreen';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 
-const Stack = createStackNavigator();
+export type RootStackParamList = {
+  ListsMenu: undefined;
+  TodoScreen: {
+    listid: number;
+    listTitle: string;
+  };
+};
+
+const Stack = createStackNavigator<RootStackParamList>();
 
 function AppNavigator() {
   return (

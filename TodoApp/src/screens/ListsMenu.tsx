@@ -44,6 +44,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     borderRadius: 10,
     backgroundColor: '#daebf2',
+    elevation: 3,
   },
   listTitleText: {
     color: '#255263',
@@ -78,7 +79,7 @@ const ListsMenu = () => {
   return (
     <View style={styles.container}>
       <Button
-        color="#3c9cc2"
+        color="#2f80a1"
         title="Create New List +"
         onPress={() => setModalVisible(true)}
       />
@@ -108,7 +109,7 @@ const ListsMenu = () => {
           <Text style={styles.inputDescription}>
             You may add your individual tasks later!
           </Text>
-          <Button color="#3c9cc2" title="Create List" onPress={handleAddList} />
+          <Button color="#2f80a1" title="Create List" onPress={handleAddList} />
         </View>
       </Modal>
     </View>

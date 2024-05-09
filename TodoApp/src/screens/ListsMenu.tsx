@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {View, Text, Button, StyleSheet, Modal, TextInput} from 'react-native';
+import {TouchableOpacity} from 'react-native-gesture-handler';
 
-// placeholder for actual styles of the containers added for each todo list
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -30,19 +30,50 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 15,
     borderBottomWidth: 1,
-    padding: 10,
+    padding: 5,
+    color: 'black',
+  },
+  inputDescription: {
+    marginBottom: 15,
+    alignSelf: 'flex-start',
+    paddingLeft: 5,
+    color: '#a2a3a2',
+    fontSize: 12,
+  },
+  buttonContainer: {
+    marginTop: 10,
+    borderRadius: 10,
+    backgroundColor: '#daebf2',
+  },
+  listTitleText: {
+    color: '#255263',
+    paddingHorizontal: 15,
+    paddingVertical: 5,
+    fontSize: 18,
   },
 });
 
 const ListsMenu = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [newListName, setNewListName] = useState('');
+  const [lists, setLists] = useState<{id: number; name: string}[]>([]);
+
+  const [lastListId, setLastListId] = useState(0);
 
   const handleAddList = () => {
-    console.log('List to add:', newListName);
+    const newList = {
+      id: lastListId + 1,
+      name: newListName,
+    };
+    setLists(currentLists => [...currentLists, newList]);
+    setLastListId(newList.id);
     setModalVisible(false);
     setNewListName('');
   };
+
+  // check if there is at least one list, then include header "Your Todo Lists"
+  // then map through the lists to display them
+  // const listsHeader = lists.length ? <Text>Your Todo Lists</Text> : null;
 
   return (
     <View style={styles.container}>
@@ -51,6 +82,15 @@ const ListsMenu = () => {
         title="Create New List +"
         onPress={() => setModalVisible(true)}
       />
+      {lists.map(list => (
+        <View key={list.id}>
+          <TouchableOpacity
+            style={styles.buttonContainer}
+            onPress={() => console.log('Navigate to list', list.id)}>
+            <Text style={styles.listTitleText}>{list.name}</Text>
+          </TouchableOpacity>
+        </View>
+      ))}
       <Modal
         animationType="slide"
         transparent={true}
@@ -61,11 +101,14 @@ const ListsMenu = () => {
         <View style={styles.modalView}>
           <TextInput
             style={styles.input}
-            placeholder="Enter new todo-list name"
+            placeholder="Enter the name of your new list"
             value={newListName}
             onChangeText={setNewListName}
           />
-          <Button color="#3c9cc2" title="Add List" onPress={handleAddList} />
+          <Text style={styles.inputDescription}>
+            You may add your individual tasks later!
+          </Text>
+          <Button color="#3c9cc2" title="Create List" onPress={handleAddList} />
         </View>
       </Modal>
     </View>

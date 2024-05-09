@@ -40,7 +40,14 @@ const styles = StyleSheet.create({
     color: '#a2a3a2',
     fontSize: 12,
   },
+  header: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginTop: 20,
+  },
   buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginTop: 10,
     borderRadius: 10,
     backgroundColor: '#daebf2',
@@ -48,8 +55,20 @@ const styles = StyleSheet.create({
   },
   listTitleText: {
     color: '#255263',
-    paddingHorizontal: 15,
+    paddingLeft: 15,
     paddingVertical: 5,
+    fontSize: 18,
+  },
+  deleteButton: {
+    paddingRight: 15,
+    paddingVertical: 5,
+    marginLeft: 10,
+    fontSize: 18,
+    color: '#255263',
+    textAlign: 'right',
+  },
+  deleteButtonText: {
+    color: 'grey',
     fontSize: 18,
   },
 });
@@ -72,9 +91,17 @@ const ListsMenu = () => {
     setNewListName('');
   };
 
+  const handleDeleteList = (id: number) => {
+    setLists(currentLists => currentLists.filter(list => list.id !== id));
+  };
+
+  // const handleNavigateToList = (id: number) => {
+
   // check if there is at least one list, then include header "Your Todo Lists"
   // then map through the lists to display them
-  // const listsHeader = lists.length ? <Text>Your Todo Lists</Text> : null;
+  const listsHeader = lists.length ? (
+    <Text style={styles.header}>Your Todo Lists</Text>
+  ) : null;
 
   return (
     <View style={styles.container}>
@@ -83,12 +110,19 @@ const ListsMenu = () => {
         title="Create New List +"
         onPress={() => setModalVisible(true)}
       />
+      {listsHeader}
       {lists.map(list => (
-        <View key={list.id}>
+        <View key={list.id} style={styles.buttonContainer}>
           <TouchableOpacity
-            style={styles.buttonContainer}
             onPress={() => console.log('Navigate to list', list.id)}>
-            <Text style={styles.listTitleText}>{list.name}</Text>
+            <Text style={styles.listTitleText} numberOfLines={2}>
+              {list.name}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => handleDeleteList(list.id)}
+            style={styles.deleteButton}>
+            <Text style={styles.deleteButtonText}>x</Text>
           </TouchableOpacity>
         </View>
       ))}

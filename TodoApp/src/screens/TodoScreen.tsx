@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {
   Text,
   View,
@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {useRoute} from '@react-navigation/native';
+import {generateNewId} from '../utils/idGenerator';
 
 export interface Task {
   id: number;
@@ -106,25 +107,16 @@ const TodoScreen = () => {
   const {listId, listTitle, todos, onUpdateTodos} = params;
 
   const [tasks, setTasks] = useState<Task[]>(todos || []); // Initialize state with todos from params
-  const [lastTaskId, setLastTaskId] = useState(0);
-
-  // to constantly update lastTaskId whenever tasks change
-  useEffect(() => {
-    if (tasks.length > 0) {
-      setLastTaskId(tasks[tasks.length - 1].id);
-    }
-  }, [tasks]);
 
   const handleAddTask = () => {
     const newTask: Task = {
-      id: lastTaskId + 1,
+      id: generateNewId(),
       description: newTaskDescription,
       is_done: false,
       listId: listId, // assign the same listId to each new task in the same list
     };
     const updatedTasks = [...tasks, newTask];
     setTasks(updatedTasks);
-    setLastTaskId(newTask.id);
     setModalVisible(false);
     setNewTaskDescription('');
     onUpdateTodos(updatedTasks);

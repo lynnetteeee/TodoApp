@@ -1,9 +1,15 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, Button, StyleSheet, Modal, TextInput} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {RootStackParamList} from '../../App';
 import {StackNavigationProp} from '@react-navigation/stack';
+
+interface List {
+  id: number;
+  name: string;
+  todos: Array<{id: number; description: string; is_done: boolean}>;
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -79,14 +85,23 @@ const styles = StyleSheet.create({
 const ListsMenu = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [newListName, setNewListName] = useState('');
-  const [lists, setLists] = useState<{id: number; name: string}[]>([]);
-
+  const [lists, setLists] = useState<List[]>([]);
   const [lastListId, setLastListId] = useState(0);
 
+  useEffect(() => {
+    if (lists.length > 0) {
+      setLastListId(lists[lists.length - 1].id);
+    }
+  }, [lists]);
+
+  const navigation =
+    useNavigation<StackNavigationProp<RootStackParamList, 'ListsMenu'>>();
+
   const handleAddList = () => {
-    const newList = {
+    const newList: List = {
       id: lastListId + 1,
       name: newListName,
+      todos: [], // start with an empty list of todos when list is first created
     };
     setLists(currentLists => [...currentLists, newList]);
     setLastListId(newList.id);
@@ -98,11 +113,6 @@ const ListsMenu = () => {
     setLists(currentLists => currentLists.filter(list => list.id !== id));
   };
 
-  const navigation =
-    useNavigation<StackNavigationProp<RootStackParamList, 'ListsMenu'>>();
-
-  // check if there is at least one list, then include header "Your Todo Lists"
-  // then map through the lists to display them
   const listsHeader = lists.length ? (
     <Text style={styles.header}>Your Todo Lists</Text>
   ) : null;
@@ -149,9 +159,6 @@ const ListsMenu = () => {
             value={newListName}
             onChangeText={setNewListName}
           />
-          <Text style={styles.inputDescription}>
-            You may add your individual tasks later!
-          </Text>
           <Button color="#2f80a1" title="Create List" onPress={handleAddList} />
         </View>
       </Modal>

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   Text,
   View,
@@ -9,6 +9,19 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {useRoute} from '@react-navigation/native';
+
+interface Task {
+  id: number;
+  description: string;
+  is_done: boolean;
+  listId: number;
+}
+
+interface TodoScreenRouteParams {
+  listId: number;
+  listTitle: string;
+  todos: Task[];
+}
 
 // placeholder for actual styles
 const styles = StyleSheet.create({
@@ -84,39 +97,36 @@ const styles = StyleSheet.create({
 });
 
 const TodoScreen = () => {
-  interface Task {
-    id: number;
-    description: string;
-    is_done: boolean;
-    todo_list_id: number;
-  }
   const [modalVisible, setModalVisible] = useState(false);
   const [newTaskDescription, setNewTaskDescription] = useState('');
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [lastTaskId, setLastTaskId] = useState(0);
 
-  interface TodoScreenRouteParams {
-    listid: number;
-    listTitle: string;
-  }
   const route = useRoute();
   const params = route.params as TodoScreenRouteParams;
-  const {listid, listTitle} = params;
+  const {listId, listTitle, todos} = params;
+
+  const [tasks, setTasks] = useState<Task[]>(todos || []); // Initialize state with todos from params
+  const [lastTaskId, setLastTaskId] = useState(0);
+
+  // to constantly update lastTaskId whenever tasks change
+  useEffect(() => {
+    if (tasks.length > 0) {
+      setLastTaskId(tasks[tasks.length - 1].id);
+    }
+  }, [tasks]);
 
   const handleAddTask = () => {
-    const newTask = {
+    const newTask: Task = {
       id: lastTaskId + 1,
       description: newTaskDescription,
       is_done: false,
-      todo_list_id: listid,
+      listId: listId, // assign the same listId to each new task in the same list
     };
     setTasks(currentTasks => [...currentTasks, newTask]);
-    setLastTaskId(lastTaskId + 1);
+    setLastTaskId(newTask.id);
     setModalVisible(false);
     setNewTaskDescription('');
   };
 
-  // allow toggling
   const handleCompleteTask = (id: number) => {
     setTasks(currentTasks =>
       currentTasks.map(task => {
@@ -128,9 +138,6 @@ const TodoScreen = () => {
     );
   };
 
-  const taskHeader =
-    tasks.length > 0 ? <Text style={styles.taskHeader}>Tasks:</Text> : null;
-
   return (
     <View style={styles.container}>
       <Text style={styles.listHeader}>{listTitle}</Text>
@@ -139,7 +146,6 @@ const TodoScreen = () => {
         title="Add New Task +"
         onPress={() => setModalVisible(true)}
       />
-      {taskHeader}
       {tasks.map(task => (
         <View key={task.id} style={styles.buttonContainer}>
           <TouchableOpacity onPress={() => handleCompleteTask(task.id)}>
@@ -164,10 +170,10 @@ const TodoScreen = () => {
           <TextInput
             style={styles.input}
             placeholder="Enter task description"
-            onChangeText={text => setNewTaskDescription(text)}
             value={newTaskDescription}
+            onChangeText={setNewTaskDescription}
           />
-          <Button title="Add Task +" onPress={handleAddTask} color="#2f80a1" />
+          <Button title="Add Task" onPress={handleAddTask} color="#2f80a1" />
         </View>
       </Modal>
     </View>

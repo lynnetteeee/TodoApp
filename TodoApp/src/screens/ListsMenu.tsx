@@ -4,11 +4,12 @@ import {useNavigation} from '@react-navigation/native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {RootStackParamList} from '../../App';
 import {StackNavigationProp} from '@react-navigation/stack';
+import {Task} from './TodoScreen';
 
 interface List {
   id: number;
   name: string;
-  todos: Array<{id: number; description: string; is_done: boolean}>;
+  todos: Task[];
 }
 
 const styles = StyleSheet.create({
@@ -113,6 +114,17 @@ const ListsMenu = () => {
     setLists(currentLists => currentLists.filter(list => list.id !== id));
   };
 
+  const handleUpdateTodos = (listId: number, updatedTodos: Task[]) => {
+    setLists(currentLists =>
+      currentLists.map(list => {
+        if (list.id === listId) {
+          return {...list, todos: updatedTodos};
+        }
+        return list;
+      }),
+    );
+  };
+
   const listsHeader = lists.length ? (
     <Text style={styles.header}>Your Todo Lists</Text>
   ) : null;
@@ -132,6 +144,9 @@ const ListsMenu = () => {
               navigation.navigate('TodoScreen', {
                 listid: list.id,
                 listTitle: list.name,
+                todos: list.todos,
+                onUpdateTodos: (updatedTodos: Task[]) =>
+                  handleUpdateTodos(list.id, updatedTodos),
               })
             }>
             <Text style={styles.listTitleText} numberOfLines={2}>

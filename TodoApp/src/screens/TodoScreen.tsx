@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import {useRoute} from '@react-navigation/native';
 
-interface Task {
+export interface Task {
   id: number;
   description: string;
   is_done: boolean;
@@ -21,6 +21,7 @@ interface TodoScreenRouteParams {
   listId: number;
   listTitle: string;
   todos: Task[];
+  onUpdateTodos: (todos: Task[]) => void;
 }
 
 // placeholder for actual styles
@@ -102,7 +103,7 @@ const TodoScreen = () => {
 
   const route = useRoute();
   const params = route.params as TodoScreenRouteParams;
-  const {listId, listTitle, todos} = params;
+  const {listId, listTitle, todos, onUpdateTodos} = params;
 
   const [tasks, setTasks] = useState<Task[]>(todos || []); // Initialize state with todos from params
   const [lastTaskId, setLastTaskId] = useState(0);
@@ -121,21 +122,23 @@ const TodoScreen = () => {
       is_done: false,
       listId: listId, // assign the same listId to each new task in the same list
     };
-    setTasks(currentTasks => [...currentTasks, newTask]);
+    const updatedTasks = [...tasks, newTask];
+    setTasks(updatedTasks);
     setLastTaskId(newTask.id);
     setModalVisible(false);
     setNewTaskDescription('');
+    onUpdateTodos(updatedTasks);
   };
 
   const handleCompleteTask = (id: number) => {
-    setTasks(currentTasks =>
-      currentTasks.map(task => {
-        if (task.id === id) {
-          return {...task, is_done: !task.is_done};
-        }
-        return task;
-      }),
-    );
+    const updatedTasks = tasks.map(task => {
+      if (task.id === id) {
+        return {...task, is_done: !task.is_done};
+      }
+      return task;
+    });
+    setTasks(updatedTasks);
+    onUpdateTodos(updatedTasks);
   };
 
   return (

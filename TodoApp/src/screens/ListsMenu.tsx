@@ -1,19 +1,10 @@
 import React, {useState} from 'react';
-import {
-  View,
-  Text,
-  Button,
-  StyleSheet,
-  Modal,
-  TextInput,
-  // NativeEventEmitter,
-} from 'react-native';
+import {View, Text, Button, StyleSheet, Modal, TextInput} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {RootStackParamList} from '../../App';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {Task} from './TodoScreen';
-// import {eventEmitter} from '../utils/eventEmitter';
 import {useTodos} from '../contexts/TodoContext';
 
 export interface List {
@@ -93,45 +84,13 @@ const styles = StyleSheet.create({
   },
 });
 
-// const eventEmitter = new NativeEventEmitter();
-
 const ListsMenu = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [newListName, setNewListName] = useState('');
   const {lists, addList, deleteList} = useTodos();
-  // const [lastListId, setLastListId] = useState(0);
-
-  // useEffect(() => {
-  //   if (lists.length > 0) {
-  //     setLastListId(lists[lists.length - 1].id);
-  //   }
-  // }, [lists]);
 
   const navigation =
     useNavigation<StackNavigationProp<RootStackParamList, 'ListsMenu'>>();
-
-  // useEffect(() => {
-  //   const updateTodosListener = eventEmitter.addListener(
-  //     'updateTodos',
-  //     (event: {listId: number; updatedTodos: Task[]}) => {
-  //       const {listId, updatedTodos} = event;
-  //       setLists(currentLists => {
-  //         const newLists = currentLists.map(list => {
-  //           if (list.id === listId) {
-  //             // shallow copy the other params, only change todos
-  //             return {...list, todos: updatedTodos};
-  //           }
-  //           return list;
-  //         });
-  //         console.log('Updated lists: ', newLists);
-  //         return newLists; // new state that React will set
-  //       });
-  //     },
-  //   );
-  //   return () => {
-  //     updateTodosListener.remove();
-  //   };
-  // }, []);
 
   const handleAddList = () => {
     const newListId =
@@ -149,17 +108,6 @@ const ListsMenu = () => {
   const handleDeleteList = (id: number) => {
     deleteList(id);
   };
-
-  // const handleUpdateTodos = (listId: number, updatedTodos: Task[]) => {
-  //   setLists(currentLists =>
-  //     currentLists.map(list => {
-  //       if (list.id === listId) {
-  //         return {...list, todos: updatedTodos};
-  //       }
-  //       return list;
-  //     }),
-  //   );
-  // };
 
   const listsHeader = lists.length ? (
     <Text style={styles.header}>Your Todo Lists</Text>

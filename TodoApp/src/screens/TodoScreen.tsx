@@ -23,12 +23,8 @@ export interface Task {
 interface TodoScreenRouteParams {
   listId: number;
   listTitle: string;
-  // todos: Task[]; - originally handled locally
 }
 
-// const UPDATE_TODOS_EVENT = 'updateTodos';
-
-// placeholder for actual styles
 const styles = StyleSheet.create({
   listHeader: {
     fontSize: 25,
@@ -110,7 +106,6 @@ const TodoScreen = () => {
   const {listId, listTitle} = params;
   const {lists, updateTodos} = useTodos();
   const currentList = lists.find(list => list.id === listId) || {todos: []};
-  // const [tasks, setTasks] = useState<Task[]>(todos || []); // Initialize state with todos from params
 
   const handleAddTask = () => {
     const newTask: Task = {
@@ -119,26 +114,13 @@ const TodoScreen = () => {
       is_done: false,
       listId: listId, // assign the same listId to each new task in the same list
     };
-    // const updatedTasks = [...tasks, newTask];
     const updatedTasks = [...currentList.todos, newTask];
-    // setTasks(updatedTasks);
     updateTodos(listId, updatedTasks);
     setModalVisible(false);
     setNewTaskDescription('');
-    // eventEmitter.emit(UPDATE_TODOS_EVENT, {listId, updatedTasks});
-    // onUpdateTodos(updatedTasks);
   };
 
   const handleCompleteTask = (id: number) => {
-    // const updatedTasks = tasks.map(task => {
-    //   if (task.id === id) {
-    //     return {...task, is_done: !task.is_done};
-    //   }
-    //   return task;
-    // });
-    // setTasks(updatedTasks);
-    // eventEmitter.emit(UPDATE_TODOS_EVENT, {listId, updatedTasks});
-    // onUpdateTodos(updatedTasks);
     const updatedTasks = currentList.todos.map(task =>
       task.id === id ? {...task, is_done: !task.is_done} : task,
     );
@@ -153,7 +135,6 @@ const TodoScreen = () => {
         title="Add New Task +"
         onPress={() => setModalVisible(true)}
       />
-      {/* {tasks.map(task => ( */}
       {currentList.todos.map(task => (
         <View key={task.id} style={styles.buttonContainer}>
           <TouchableOpacity onPress={() => handleCompleteTask(task.id)}>

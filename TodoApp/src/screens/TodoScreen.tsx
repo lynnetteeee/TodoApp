@@ -10,6 +10,8 @@ import {
 } from 'react-native';
 import {useRoute} from '@react-navigation/native';
 import {generateNewId} from '../utils/idGenerator';
+// import {eventEmitter} from '../utils/eventEmitter';
+import {useTodos} from '../contexts/TodoContext';
 
 export interface Task {
   id: number;
@@ -21,9 +23,10 @@ export interface Task {
 interface TodoScreenRouteParams {
   listId: number;
   listTitle: string;
-  todos: Task[];
-  onUpdateTodos: (todos: Task[]) => void;
+  // todos: Task[]; - originally handled locally
 }
+
+// const UPDATE_TODOS_EVENT = 'updateTodos';
 
 // placeholder for actual styles
 const styles = StyleSheet.create({
@@ -104,9 +107,10 @@ const TodoScreen = () => {
 
   const route = useRoute();
   const params = route.params as TodoScreenRouteParams;
-  const {listId, listTitle, todos, onUpdateTodos} = params;
-
-  const [tasks, setTasks] = useState<Task[]>(todos || []); // Initialize state with todos from params
+  const {listId, listTitle} = params;
+  const {lists, updateTodos} = useTodos();
+  const currentList = lists.find(list => list.id === listId) || {todos: []};
+  // const [tasks, setTasks] = useState<Task[]>(todos || []); // Initialize state with todos from params
 
   const handleAddTask = () => {
     const newTask: Task = {
@@ -115,22 +119,30 @@ const TodoScreen = () => {
       is_done: false,
       listId: listId, // assign the same listId to each new task in the same list
     };
-    const updatedTasks = [...tasks, newTask];
-    setTasks(updatedTasks);
+    // const updatedTasks = [...tasks, newTask];
+    const updatedTasks = [...currentList.todos, newTask];
+    // setTasks(updatedTasks);
+    updateTodos(listId, updatedTasks);
     setModalVisible(false);
     setNewTaskDescription('');
-    onUpdateTodos(updatedTasks);
+    // eventEmitter.emit(UPDATE_TODOS_EVENT, {listId, updatedTasks});
+    // onUpdateTodos(updatedTasks);
   };
 
   const handleCompleteTask = (id: number) => {
-    const updatedTasks = tasks.map(task => {
-      if (task.id === id) {
-        return {...task, is_done: !task.is_done};
-      }
-      return task;
-    });
-    setTasks(updatedTasks);
-    onUpdateTodos(updatedTasks);
+    // const updatedTasks = tasks.map(task => {
+    //   if (task.id === id) {
+    //     return {...task, is_done: !task.is_done};
+    //   }
+    //   return task;
+    // });
+    // setTasks(updatedTasks);
+    // eventEmitter.emit(UPDATE_TODOS_EVENT, {listId, updatedTasks});
+    // onUpdateTodos(updatedTasks);
+    const updatedTasks = currentList.todos.map(task =>
+      task.id === id ? {...task, is_done: !task.is_done} : task,
+    );
+    updateTodos(listId, updatedTasks);
   };
 
   return (
@@ -141,7 +153,8 @@ const TodoScreen = () => {
         title="Add New Task +"
         onPress={() => setModalVisible(true)}
       />
-      {tasks.map(task => (
+      {/* {tasks.map(task => ( */}
+      {currentList.todos.map(task => (
         <View key={task.id} style={styles.buttonContainer}>
           <TouchableOpacity onPress={() => handleCompleteTask(task.id)}>
             <Text

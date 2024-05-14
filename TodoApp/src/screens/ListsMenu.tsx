@@ -1,12 +1,22 @@
-import React, {useEffect, useState} from 'react';
-import {View, Text, Button, StyleSheet, Modal, TextInput} from 'react-native';
+import React, {useState} from 'react';
+import {
+  View,
+  Text,
+  Button,
+  StyleSheet,
+  Modal,
+  TextInput,
+  // NativeEventEmitter,
+} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {RootStackParamList} from '../../App';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {Task} from './TodoScreen';
+// import {eventEmitter} from '../utils/eventEmitter';
+import {useTodos} from '../contexts/TodoContext';
 
-interface List {
+export interface List {
   id: number;
   name: string;
   todos: Task[];
@@ -83,47 +93,73 @@ const styles = StyleSheet.create({
   },
 });
 
+// const eventEmitter = new NativeEventEmitter();
+
 const ListsMenu = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [newListName, setNewListName] = useState('');
-  const [lists, setLists] = useState<List[]>([]);
-  const [lastListId, setLastListId] = useState(0);
+  const {lists, addList, deleteList} = useTodos();
+  // const [lastListId, setLastListId] = useState(0);
 
-  useEffect(() => {
-    if (lists.length > 0) {
-      setLastListId(lists[lists.length - 1].id);
-    }
-  }, [lists]);
+  // useEffect(() => {
+  //   if (lists.length > 0) {
+  //     setLastListId(lists[lists.length - 1].id);
+  //   }
+  // }, [lists]);
 
   const navigation =
     useNavigation<StackNavigationProp<RootStackParamList, 'ListsMenu'>>();
 
+  // useEffect(() => {
+  //   const updateTodosListener = eventEmitter.addListener(
+  //     'updateTodos',
+  //     (event: {listId: number; updatedTodos: Task[]}) => {
+  //       const {listId, updatedTodos} = event;
+  //       setLists(currentLists => {
+  //         const newLists = currentLists.map(list => {
+  //           if (list.id === listId) {
+  //             // shallow copy the other params, only change todos
+  //             return {...list, todos: updatedTodos};
+  //           }
+  //           return list;
+  //         });
+  //         console.log('Updated lists: ', newLists);
+  //         return newLists; // new state that React will set
+  //       });
+  //     },
+  //   );
+  //   return () => {
+  //     updateTodosListener.remove();
+  //   };
+  // }, []);
+
   const handleAddList = () => {
+    const newListId =
+      lists.reduce((maxId, list) => Math.max(list.id, maxId), 0) + 1;
     const newList: List = {
-      id: lastListId + 1,
+      id: newListId,
       name: newListName,
-      todos: [], // start with an empty list of todos when list is first created
+      todos: [],
     };
-    setLists(currentLists => [...currentLists, newList]);
-    setLastListId(newList.id);
+    addList(newList);
     setModalVisible(false);
     setNewListName('');
   };
 
   const handleDeleteList = (id: number) => {
-    setLists(currentLists => currentLists.filter(list => list.id !== id));
+    deleteList(id);
   };
 
-  const handleUpdateTodos = (listId: number, updatedTodos: Task[]) => {
-    setLists(currentLists =>
-      currentLists.map(list => {
-        if (list.id === listId) {
-          return {...list, todos: updatedTodos};
-        }
-        return list;
-      }),
-    );
-  };
+  // const handleUpdateTodos = (listId: number, updatedTodos: Task[]) => {
+  //   setLists(currentLists =>
+  //     currentLists.map(list => {
+  //       if (list.id === listId) {
+  //         return {...list, todos: updatedTodos};
+  //       }
+  //       return list;
+  //     }),
+  //   );
+  // };
 
   const listsHeader = lists.length ? (
     <Text style={styles.header}>Your Todo Lists</Text>
@@ -142,11 +178,9 @@ const ListsMenu = () => {
           <TouchableOpacity
             onPress={() =>
               navigation.navigate('TodoScreen', {
-                listid: list.id,
+                listId: list.id,
                 listTitle: list.name,
                 todos: list.todos,
-                onUpdateTodos: (updatedTodos: Task[]) =>
-                  handleUpdateTodos(list.id, updatedTodos),
               })
             }>
             <Text style={styles.listTitleText} numberOfLines={2}>

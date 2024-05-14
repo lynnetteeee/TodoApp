@@ -11,14 +11,14 @@ import TodoScreen from './src/screens/TodoScreen';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {Task} from './src/screens/TodoScreen';
+import {TodoProvider} from './src/contexts/TodoContext';
 
 export type RootStackParamList = {
   ListsMenu: undefined;
   TodoScreen: {
-    listid: number;
+    listId: number;
     listTitle: string;
     todos: Task[];
-    onUpdateTodos: (todos: Task[]) => void;
   };
 };
 
@@ -26,14 +26,16 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 function AppNavigator() {
   return (
-    <Stack.Navigator initialRouteName="ListsMenu">
-      <Stack.Screen name="ListsMenu" component={ListsMenu} />
-      <Stack.Screen
-        name="TodoScreen"
-        component={TodoScreen}
-        options={{title: 'Todo List'}}
-      />
-    </Stack.Navigator>
+    <TodoProvider>
+      <Stack.Navigator initialRouteName="ListsMenu">
+        <Stack.Screen name="ListsMenu" component={ListsMenu} />
+        <Stack.Screen
+          name="TodoScreen"
+          component={TodoScreen}
+          options={{title: 'Todo List'}}
+        />
+      </Stack.Navigator>
+    </TodoProvider>
   );
 }
 

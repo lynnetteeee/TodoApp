@@ -68,7 +68,9 @@ export const TodoProvider = ({children}: TodoProviderProps) => {
         return;
       }
       // Delete all todo items in the list
-      await Promise.all(listToDelete.todos.map(todo => deleteTodo(todo.id)));
+      await Promise.all(
+        (listToDelete.todos ?? []).map(todo => deleteTodo(todo.id)),
+      );
       const response = await deleteTodoList(listId);
       if (response.status === SUCCESS_STATUS) {
         setLists(prevLists => prevLists.filter(list => list.id !== listId));

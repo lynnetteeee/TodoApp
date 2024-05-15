@@ -1,8 +1,19 @@
-import React, {createContext, useContext, useState, ReactNode} from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from 'react';
 import {List} from '../screens/ListsMenu';
 import {Task} from '../screens/TodoScreen';
+import {
+  SUCCESS_STATUS,
+  getTodoLists,
+  createTodoList,
+  deleteTodoList,
+} from '../api/api';
 
-// Defines the types of actions or operations you can perform in the context
 interface TodoContextType {
   lists: List[];
   addList: (list: List) => void;
@@ -10,35 +21,54 @@ interface TodoContextType {
   deleteList: (listId: number) => void;
 }
 
-// Creates context with undefined initial value but with the correct type
 const TodoContext = createContext<TodoContextType | undefined>(undefined);
 
-// Provider Props Type
 interface TodoProviderProps {
   children: ReactNode;
 }
 
-// Provider component
 export const TodoProvider = ({children}: TodoProviderProps) => {
   const [lists, setLists] = useState<List[]>([]);
 
+  useEffect(() => {
+    getTodoLists()
+      .then(response => {
+        setLists(response.data);
+      })
+      .catch(error => console.error('Error fetching todo lists', error));
+  }, []);
+
   // Adds a new list
-  const addList = (list: List) => {
-    setLists(prevLists => [...prevLists, list]);
+  const addList = async (list: List) => {
+    const response = await createTodoList(list.id, list.name);
+    if (response.status === SUCCESS_STATUS) {
+      setLists(prevLists => [...prevLists, list]);
+    } else {
+      console.error('Error creating new list');
+    }
   };
 
   // Updates todos in an existing list
   const updateTodos = (listId: number, updatedTodos: Task[]) => {
-    setLists(prevLists =>
-      prevLists.map(list =>
+    console.log(`Updating todos for list ${listId}`);
+    // Directly update the local state without making an unnecessary API call
+    setLists(prevLists => {
+      const newLists = prevLists.map(list =>
         list.id === listId ? {...list, todos: updatedTodos} : list,
-      ),
-    );
+      );
+      console.log('New lists state:', newLists);
+      return newLists;
+    });
   };
 
   // Deletes a list
-  const deleteList = (listId: number) => {
-    setLists(prevLists => prevLists.filter(list => list.id !== listId));
+  const deleteList = async (listId: number) => {
+    const response = await deleteTodoList(listId);
+    if (response.status === SUCCESS_STATUS) {
+      setLists(prevLists => prevLists.filter(list => list.id !== listId));
+    } else {
+      console.error('Error deleting list');
+    }
   };
 
   return (

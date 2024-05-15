@@ -1,4 +1,4 @@
-let lastId = 0;
+let lastId = 1000;
 
 export const generateNewId = (): number => {
   lastId += 1;

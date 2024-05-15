@@ -1,5 +1,13 @@
 import React, {useState} from 'react';
-import {View, Text, Button, StyleSheet, Modal, TextInput} from 'react-native';
+import {
+  View,
+  Text,
+  Button,
+  StyleSheet,
+  Modal,
+  TextInput,
+  Alert,
+} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {RootStackParamList} from '../../App';
@@ -92,7 +100,11 @@ const ListsMenu = () => {
   const navigation =
     useNavigation<StackNavigationProp<RootStackParamList, 'ListsMenu'>>();
 
-  const handleAddList = () => {
+  const handleAddList = async () => {
+    if (!newListName.trim()) {
+      Alert.alert('Please enter a valid list name.');
+      return;
+    }
     const newListId =
       lists.reduce((maxId, list) => Math.max(list.id, maxId), 0) + 1;
     const newList: List = {
@@ -105,7 +117,7 @@ const ListsMenu = () => {
     setNewListName('');
   };
 
-  const handleDeleteList = (id: number) => {
+  const handleDeleteList = async (id: number) => {
     deleteList(id);
   };
 

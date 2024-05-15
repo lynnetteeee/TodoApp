@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   Text,
   View,
@@ -10,8 +10,13 @@ import {
 } from 'react-native';
 import {useRoute} from '@react-navigation/native';
 import {generateNewId} from '../utils/idGenerator';
-// import {eventEmitter} from '../utils/eventEmitter';
 import {useTodos} from '../contexts/TodoContext';
+import {
+  SUCCESS_STATUS,
+  createTodo,
+  updateTodo,
+  getSpecificListWithTodos,
+} from '../api/api';
 
 export interface Task {
   id: number;
@@ -56,7 +61,7 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 40,
-    width: '100%',
+    width: 250,
     marginBottom: 15,
     borderBottomWidth: 1,
     padding: 5,
@@ -105,26 +110,69 @@ const TodoScreen = () => {
   const params = route.params as TodoScreenRouteParams;
   const {listId, listTitle} = params;
   const {lists, updateTodos} = useTodos();
-  const currentList = lists.find(list => list.id === listId) || {todos: []};
-
-  const handleAddTask = () => {
-    const newTask: Task = {
-      id: generateNewId(),
-      description: newTaskDescription,
-      is_done: false,
-      listId: listId, // assign the same listId to each new task in the same list
-    };
-    const updatedTasks = [...currentList.todos, newTask];
-    updateTodos(listId, updatedTasks);
-    setModalVisible(false);
-    setNewTaskDescription('');
+  const currentList = lists.find(list => list.id === listId) ?? {
+    id: listId,
+    name: listTitle,
+    todos: [],
   };
 
-  const handleCompleteTask = (id: number) => {
-    const updatedTasks = currentList.todos.map(task =>
-      task.id === id ? {...task, is_done: !task.is_done} : task,
+  useEffect(() => {
+    getSpecificListWithTodos(listId)
+      .then(response => {
+        updateTodos(listId, response.data.todos || []);
+      })
+      .catch((error: any) => console.error('Error fetching todos', error));
+  }, [listId, updateTodos]);
+
+  const handleAddTask = async () => {
+    try {
+      const newTaskId = generateNewId();
+      const newTask: Task = {
+        id: newTaskId,
+        description: newTaskDescription,
+        is_done: false,
+        listId: listId,
+      };
+      const response = await createTodo(
+        newTask.id,
+        newTask.description,
+        newTask.is_done,
+        newTask.listId,
+      );
+      if (response.status === SUCCESS_STATUS) {
+        const updatedTasks = [...currentList.todos, newTask];
+        updateTodos(listId, updatedTasks);
+        setModalVisible(false);
+        setNewTaskDescription('');
+      } else {
+        console.error('Failed to create new task:', response);
+      }
+    } catch (error: any) {
+      console.error(
+        'Error in handleAddTask:',
+        error.response ? error.response.data : error.message,
+      );
+    }
+  };
+
+  const handleCompleteTask = async (id: number) => {
+    const specificTask = currentList.todos.find(task => task.id === id);
+    if (!specificTask) {
+      console.error('Task not found');
+      return;
+    }
+    const response = await updateTodo(
+      id,
+      specificTask.description,
+      !specificTask.is_done,
+      listId,
     );
-    updateTodos(listId, updatedTasks);
+    if (response.status === SUCCESS_STATUS) {
+      const specificList = await getSpecificListWithTodos(listId);
+      updateTodos(listId, specificList.data.todos);
+    } else {
+      console.error('Error updating task');
+    }
   };
 
   return (
@@ -135,9 +183,12 @@ const TodoScreen = () => {
         title="Add New Task +"
         onPress={() => setModalVisible(true)}
       />
-      {currentList.todos.map(task => (
-        <View key={task.id} style={styles.buttonContainer}>
-          <TouchableOpacity onPress={() => handleCompleteTask(task.id)}>
+      {currentList.todos && currentList.todos.length > 0 ? (
+        currentList.todos.map(task => (
+          <TouchableOpacity
+            key={task.id}
+            style={styles.buttonContainer}
+            onPress={() => handleCompleteTask(task.id)}>
             <Text
               style={[
                 styles.taskDescription,
@@ -146,8 +197,10 @@ const TodoScreen = () => {
               {task.description}
             </Text>
           </TouchableOpacity>
-        </View>
-      ))}
+        ))
+      ) : (
+        <Text>No tasks available</Text>
+      )}
       <Modal
         animationType="slide"
         transparent={true}

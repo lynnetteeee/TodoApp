@@ -15,7 +15,7 @@ export const getTodoLists = () => {
 };
 
 // Handles POST requests to create a new todo list.
-// "todos" parameter not needed, as it is supposed to be empty for a new list.
+// NOTE: "todos" parameter not needed, initialised as [] by default.
 export const createTodoList = (id: number, name: string) => {
   return apiClient.post('/todo-lists', {id, name});
 };
@@ -27,13 +27,12 @@ export const deleteTodoList = (id: number) => {
 
 // ------------------------ used in TodoScreen.tsx ------------------------
 
-// Handles GET requests to fetch todos for a specific list.
+// Handles GET requests to fetch todos for a specific todo-list.
 export const getSpecificListWithTodos = (todo_list_id: number) => {
   return apiClient.get(`/todo-lists/${todo_list_id}`);
 };
 
 // Handles PUT requests to update an existing todo.
-// Needed when there is a change in "is_done" parameter.
 export const updateTodo = (
   todo_id: number,
   description: string,
@@ -48,8 +47,7 @@ export const updateTodo = (
   });
 };
 
-// Handles POST requests to create a new todo within a list.
-// The actual posting is to a "global" list of all todos, identified by unique todo_id.
+// Handles POST requests to create a new todo in a "global" list of all todos.
 export const createTodo = (
   todo_id: number,
   description: string,

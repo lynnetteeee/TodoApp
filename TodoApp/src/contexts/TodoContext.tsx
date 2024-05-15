@@ -39,7 +39,6 @@ export const TodoProvider = ({children}: TodoProviderProps) => {
       .catch(error => console.error('Error fetching todo lists', error));
   }, []);
 
-  // Adds a new list
   const addList = async (list: List) => {
     const response = await createTodoList(list.id, list.name);
     if (response.status === SUCCESS_STATUS) {
@@ -49,10 +48,9 @@ export const TodoProvider = ({children}: TodoProviderProps) => {
     }
   };
 
-  // Updates todos in an existing list
   const updateTodos = (listId: number, updatedTodos: Task[]) => {
     console.log(`Updating todos for list ${listId}`);
-    // Directly update the local state without making unnecessary API call
+    // Directly update the local state without unnecessary API call
     setLists(prevLists => {
       const newLists = prevLists.map(list =>
         list.id === listId ? {...list, todos: updatedTodos} : list,
@@ -62,7 +60,6 @@ export const TodoProvider = ({children}: TodoProviderProps) => {
     });
   };
 
-  // Deletes a list
   const deleteList = async (listId: number) => {
     try {
       const listToDelete = lists.find(list => list.id === listId);

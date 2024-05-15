@@ -31,6 +31,23 @@ export const deleteTodoList = (id: number) => {
 export const getSpecificListWithTodos = (todo_list_id: number) => {
   return apiClient.get(`/todo-lists/${todo_list_id}`);
 };
+
+// Handles PUT requests to update an existing todo.
+// Needed when there is a change in "is_done" parameter.
+export const updateTodo = (
+  todo_id: number,
+  description: string,
+  is_done: boolean,
+  todo_list_id: number,
+) => {
+  return apiClient.put(`/todos/${todo_id}`, {
+    id: todo_id,
+    description,
+    is_done,
+    todo_list_id,
+  });
+};
+
 // Handles POST requests to create a new todo within a list.
 // The actual posting is to a "global" list of all todos, identified by unique todo_id.
 export const createTodo = (
@@ -52,20 +69,9 @@ export const createTodo = (
   }
 };
 
-// Handles PUT requests to update an existing todo.
-// Needed when there is a change in "is_done" parameter.
-export const updateTodo = (
-  todo_id: number,
-  description: string,
-  is_done: boolean,
-  todo_list_id: number,
-) => {
-  return apiClient.put(`/todos/${todo_id}`, {
-    id: todo_id,
-    description,
-    is_done,
-    todo_list_id,
-  });
+// Handles DELETE requests to remove an existing todo.
+export const deleteTodo = (id: number) => {
+  return apiClient.delete(`/todos/${id}`);
 };
 
 // ------------------------ others included for completeness ------------------------
@@ -74,11 +80,6 @@ export const updateTodo = (
 // Note: ONLY allows updating the name of the list, not the todos.
 export const updateTodoList = (id: number, name: string) => {
   return apiClient.put(`/todo-lists/${id}`, {id, name});
-};
-
-// Handles DELETE requests to remove an existing todo.
-export const deleteTodo = (id: number) => {
-  return apiClient.delete(`/todos/${id}`);
 };
 
 // Handles GET requests to fetch a specific todo.

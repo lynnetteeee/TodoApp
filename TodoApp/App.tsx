@@ -1,10 +1,3 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
 import React from 'react';
 import ListsMenu from './src/screens/ListsMenu';
 import TodoScreen from './src/screens/TodoScreen';

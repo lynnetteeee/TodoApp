@@ -12,6 +12,7 @@ import {
   getTodoLists,
   createTodoList,
   deleteTodoList,
+  deleteTodo,
 } from '../api/api';
 
 interface TodoContextType {
@@ -51,7 +52,7 @@ export const TodoProvider = ({children}: TodoProviderProps) => {
   // Updates todos in an existing list
   const updateTodos = (listId: number, updatedTodos: Task[]) => {
     console.log(`Updating todos for list ${listId}`);
-    // Directly update the local state without making an unnecessary API call
+    // Directly update the local state without making unnecessary API call
     setLists(prevLists => {
       const newLists = prevLists.map(list =>
         list.id === listId ? {...list, todos: updatedTodos} : list,
@@ -63,11 +64,22 @@ export const TodoProvider = ({children}: TodoProviderProps) => {
 
   // Deletes a list
   const deleteList = async (listId: number) => {
-    const response = await deleteTodoList(listId);
-    if (response.status === SUCCESS_STATUS) {
-      setLists(prevLists => prevLists.filter(list => list.id !== listId));
-    } else {
-      console.error('Error deleting list');
+    try {
+      const listToDelete = lists.find(list => list.id === listId);
+      if (!listToDelete) {
+        console.error('List not found');
+        return;
+      }
+      // Delete all todo items in the list
+      await Promise.all(listToDelete.todos.map(todo => deleteTodo(todo.id)));
+      const response = await deleteTodoList(listId);
+      if (response.status === SUCCESS_STATUS) {
+        setLists(prevLists => prevLists.filter(list => list.id !== listId));
+      } else {
+        console.error('Error deleting list');
+      }
+    } catch (error) {
+      console.error('Error in deleteList:', error);
     }
   };
 
